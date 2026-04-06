@@ -1,0 +1,54 @@
+# Byte-compiled / optimized
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Virtual environments
+.venv/
+venv/
+env/
+.env/
+
+# Poetry
+# poetry.lock は通常コミットする（コメントアウト）
+# poetry.lock
+
+# Packaging / build
+build/
+dist/
+*.egg-info/
+*.egg
+.eggs/
+
+# Test / coverage / linters
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors / IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Cursor
+.cursor/
+
+# Logs & local scratch
+*.log
+tmp/
+temp/

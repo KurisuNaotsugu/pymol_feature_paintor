@@ -1,4 +1,6 @@
-# scripts/plugin_test.py
+# src/plugin/plugin_test.py
+from __future__ import annotations
+
 from pymol import cmd
 
 # 実行関数の定義

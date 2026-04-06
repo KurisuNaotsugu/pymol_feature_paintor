@@ -9,7 +9,41 @@ readme = "README.md"
 python = "^3.11"
 requests = "^2.32.5"
 
+[tool.pytest.ini_options]
+testpaths = ["tests"]
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[[tool.poetry.packages]]
+include = "api"
+from = "src"
+
+[[tool.poetry.packages]]
+include = "core"
+from = "src"
+
+[[tool.poetry.packages]]
+include = "services"
+from = "src"
+
+[[tool.poetry.packages]]
+include = "converter"
+from = "src"
+
+[[tool.poetry.packages]]
+include = "molpaint"
+from = "src"
+
+[[tool.poetry.packages]]
+include = "plugin"
+from = "src"
+
+[[tool.poetry.packages]]
+include = "cli"
+from = "."
+
+[tool.poetry.scripts]
+uniprot-search-json = "cli.uniprot_search_json:main"
+alphafold-prediction-json = "cli.alphafold_prediction_json:main"

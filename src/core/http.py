@@ -1,5 +1,7 @@
-# src/pymol_topology/core/http.py
+# src/core/http.py
+"""HTTP セッション生成"""
 from __future__ import annotations
+
 import requests
 
 
@@ -10,11 +12,15 @@ def make_session(user_agent: str = "pymol-topology-plugin/0.1") -> requests.Sess
         user_agent(str): ユーザーエージェント
 
     Returns:
-        requests.Session(requests.Session): requests.Session インスタンス
+        requests.Session インスタンス
     """
+
     s = requests.Session()
-    s.headers.update({
-        "User-Agent": user_agent,
-        "Accept": "application/json",
-    })
+    s.headers.update(
+        {
+            "User-Agent": user_agent,
+            "Accept": "application/json",
+        }
+    )
     return s
+
