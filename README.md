@@ -93,20 +93,20 @@ pymol_env/
 
 ### 1. PyMOL の起動とプラグインのインポート
 
-1. プロジェクトのルートディレクトリに移動
+#### 1. プロジェクトのルートディレクトリに移動
 
 ```bash
 cd /path/to/pymol_env
 ```
 
-1. 仮想環境をアクチベート (`conda activate` or `poetry shell`)
+#### 2. 仮想環境をアクチベート (`conda activate` or `poetry shell`)
 
 ```bash
 conda activate env_name # conda環境
 poetry shell # poetry環境
 ```
 
-1. **pymol 起動**
+#### 3. pymol 起動
 
 ```bash
 pymol
@@ -114,7 +114,38 @@ pymol
 
 pymolが起動して、プラグインのスクリプトがpymolのコマンドライン上で実行されていれば成功です
 
-プラグイン読み込み成功時のpymolの画面
+```text
+ PyMOL(TM) Molecular Graphics System, Version 3.1.0.
+ Copyright (c) Schrodinger, LLC.
+ All Rights Reserved.
+ 
+    Created by Warren L. DeLano, Ph.D. 
+ 
+    PyMOL is user-supported open-source software.  Although some versions
+    are freely available, PyMOL is not in the public domain.
+ 
+    If PyMOL is helpful in your work or study, then please volunteer 
+    support for our ongoing efforts to create open and affordable scientific
+    software by purchasing a PyMOL Maintenance and/or Support subscription.
+ 
+    More information can be found at "http://www.pymol.org".
+ 
+    Enter "help" for a list of commands.
+    Enter "help <command-name>" for information on a specific command.
+ 
+ Hit ESC anytime to toggle between text and graphics.
+ 
+ Detected OpenGL version 2.1. Shaders available.
+ Tessellation shaders not available
+ Detected GLSL version 1.20.
+ OpenGL graphics engine:
+  GL_VENDOR:   Apple
+  GL_RENDERER: Apple M4
+  GL_VERSION:  2.1 Metal - 90.5
+ Detected 10 CPU cores.  Enabled multithreaded rendering.
+PyMOL>run /Users/you/your_env/src/plugin/fetch_af_structure.py
+PyMOL>run /Users/you/your_env/src/plugin/paint_feature.py
+```
 
 ### 2. AlphaFold 構造を取得してロード
 
@@ -133,7 +164,7 @@ fetch_af P12345
 - ロードされる PyMOL オブジェクト名は `AF_{accession}` になります。
 - 初回取得時はキャッシュ（例: `~/.cache/pymol_topology/...`）へ保存し、2回目以降は再利用します。
 
-![ロードされた3D構造データ]()
+![ロードされた3D構造データ](./figures/fetch_af.png)
 
 #### 2. UniProt からfeature 情報を登録
 ##### コマンド
@@ -145,7 +176,23 @@ preview_feature_domains_from_accession P12345
   accession (str): UniProt accession（例: P12345）
 ```
 
-![Uniprtoから取得できるfeature一覧]()
+出力 (抜粋)
+```text
+PyMOL>preview_feature_domains_from_accession P08100
+[feature preview] accession='P08100'  DomainInfo 78 件（全 feature type）
+  [   1]  domain_name='Motif'  description="'Ionic lock' involved in activated form stabilization"
+  [   2]  domain_name='Topological domain'  description='Cytoplasmic'
+  [   3]  domain_name='Topological domain'  description='Extracellular'
+  [   4]  domain_name='Transmembrane'  description='Helical; Name=1'
+  [   5]  domain_name='Transmembrane'  description='Helical; Name=2'
+  [   6]  domain_name='Transmembrane'  description='Helical; Name=3'
+  [   7]  domain_name='Transmembrane'  description='Helical; Name=4'
+  [   8]  domain_name='Transmembrane'  description='Helical; Name=5'
+  [   9]  domain_name='Transmembrane'  description='Helical; Name=6'
+  [  10]  domain_name='Transmembrane'  description='Helical; Name=7'
+  [  11]  domain_name='Mutagenesis'  description='Induces a conformation change that promotes interaction with GRK1 and SAG; when associated with Q-113.'
+  [  12]  domain_name='Mutagenesis'  description='Induces a conformation change that promotes interaction with GRK1 and SAG; when associated with Y-257.'
+```
 
 #### 3. 着色する feature を pymol に登録
 ##### コマンド
@@ -186,14 +233,20 @@ paint_feature rg_P12345, AF_P12345
 #### Note
 対象オブジェクトが未ロードの場合はエラーになります（自動では AlphaFold を取得しません）。
 
-![着色後の3D構造データ]()
+![着色後の3D構造データ](./figures/painted_model.png)
 
 #### 5. 登録済みの feature 情報の閲覧
 ##### コマンド
 ```python
 list_feature_registry
 ```
-![登録済みの featuer 情報一覧の出力]()
+
+##### 出力
+```text
+PyMOL>list_feature_registry
+  'rg_P08100'  (7 件)
+[feature registry] 登録名 1 件
+```
 
 #### 6. 登録済みの feature の指定領域の閲覧
 ##### コマンド
@@ -201,11 +254,54 @@ list_feature_registry
 show_feature_domain_infos rg_P12345
 ```
 
-#### 引数
+##### 引数
 ```text 
   registry_name: レジストリキー (例: rg_P12345)
 ```
 
+##### 出力
+```text
+PyMOL>list_feature_registry
+  'rg_P08100'  (7 件)
+[feature registry] 登録名 1 件
+PyMOL>show_feature_domain_infos rg_P08100
+[feature registry] 'rg_P08100' の DomainInfo（7 件）
+  --- [1] ---
+  domain_name: 'Transmembrane'
+  description: 'Helical; Name=1'
+  spans:       [(37, 61)]
+  color.name:  'salmon'
+  --- [2] ---
+  domain_name: 'Transmembrane'
+  description: 'Helical; Name=2'
+  spans:       [(74, 96)]
+  color.name:  'lime'
+  --- [3] ---
+  domain_name: 'Transmembrane'
+  description: 'Helical; Name=3'
+  spans:       [(111, 133)]
+  color.name:  'slate'
+  --- [4] ---
+  domain_name: 'Transmembrane'
+  description: 'Helical; Name=4'
+  spans:       [(153, 173)]
+  color.name:  'marine'
+  --- [5] ---
+  domain_name: 'Transmembrane'
+  description: 'Helical; Name=5'
+  spans:       [(203, 224)]
+  color.name:  'violet'
+  --- [6] ---
+  domain_name: 'Transmembrane'
+  description: 'Helical; Name=6'
+  spans:       [(253, 274)]
+  color.name:  'pink'
+  --- [7] ---
+  domain_name: 'Transmembrane'
+  description: 'Helical; Name=7'
+  spans:       [(285, 309)]
+  color.name:  'olive'
+```
 ### 主要データクラス（どこで使うか）
 
 - `ApiResponse`（`src/api/base.py`）
