@@ -158,7 +158,7 @@ def register_feature_from_csv(
     """CSV から ``List[DomainInfo]`` を構築し、``registry_name`` に結合登録
 
     Args:
-        registry_name: pymol オブジェクト名
+        registry_name: レジストリキー
         csv_path: CSV ファイルパス
         encoding: CSV ファイルエンコーディング
     """
