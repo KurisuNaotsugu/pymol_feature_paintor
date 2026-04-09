@@ -1,12 +1,15 @@
+# src/converter/csv_loader.py
 """CSV から ``list[DomainInfo]`` を構築する。
 
 想定する CSV（1 行につき 1 区間）:
 
-- 必須列: ドメイン名・開始・終了（列名はエイリアス可、下記）
-- 任意列: チェーン ID、PyMOL 色名
+- 許容される列名は ``domain_name``, ``description``, ``start``, ``end``, ``chain``, ``color`` のみ
+  （大文字・小文字は区別しない）。上記以外の列名があるとエラーとする。
+- 必須となる値: 各行について ``domain_name``, ``start``, ``end``
+- 省略可能: ``description``（無い場合は空文字）、``chain``, ``color``
 
 同一の ``(domain_name, description, chain)`` に属する複数行は、1 つの ``DomainInfo`` にまとめ、
-``spans`` は開始位置順に並べる。``description`` 列が無い場合は空文字として扱う。
+``spans`` は開始位置順に並べる。
 """
 from __future__ import annotations
 
@@ -17,27 +20,40 @@ from typing import IO, Optional, Union
 
 from converter.constractor import ColorDef, DomainInfo
 
-_FIELD_ALIASES: dict[str, tuple[str, ...]] = {
-    "domain_name": ("domain_name", "domain", "name", "feature_type", "type", "feature"),
-    "description": ("description", "desc", "detail"),
-    "start": ("start", "begin", "from"),
-    "end": ("end", "stop", "to"),
-    "chain": ("chain", "chain_id"),
-    "color": ("color", "color_name", "pymol_color"),
-}
+_ALLOWED_COLUMNS = frozenset(
+    ("domain_name", "description", "start", "end", "chain", "color")
+)
 
 
-def _norm_row(raw: dict[str, str]) -> dict[str, str]:
-    return {k.strip().lower(): (v or "").strip() for k, v in raw.items()}
+def _validate_csv_headers(fieldnames: Optional[list[str]]) -> None:
+    if not fieldnames:
+        return
+    invalid = [
+        name
+        for name in fieldnames
+        if name is not None and name.strip() and name.strip().lower() not in _ALLOWED_COLUMNS
+    ]
+    if invalid:
+        allowed = ", ".join(sorted(_ALLOWED_COLUMNS))
+        bad = ", ".join(repr(x) for x in invalid)
+        raise ValueError(
+            f"許容されない列名があります: {bad}。許容される列名は次のみです: {allowed}"
+        )
 
 
-def _field(norm: dict[str, str], canonical: str) -> str:
-    for alias in _FIELD_ALIASES.get(canonical, (canonical,)):
-        if alias in norm:
-            return norm[alias]
-    return ""
+def _row_to_canonical(raw: dict[str, str]) -> dict[str, str]:
+    out: dict[str, str] = {k: "" for k in _ALLOWED_COLUMNS}
+    for k, v in raw.items():
+        if k is None:
+            continue
+        key = k.strip().lower()
+        if key in _ALLOWED_COLUMNS:
+            out[key] = (v or "").strip()
+    return out
 
-
+# ------------------------------------------------------------
+# メイン関数
+# ------------------------------------------------------------
 def load_domain_infos_from_csv_file(f: IO[str]) -> list[DomainInfo]:
     """テキストストリーム（CSV）から ``DomainInfo`` のリストを構築する。
 
@@ -51,20 +67,22 @@ def load_domain_infos_from_csv_file(f: IO[str]) -> list[DomainInfo]:
     if not reader.fieldnames:
         return []
 
+    _validate_csv_headers(reader.fieldnames)
+
     groups: dict[tuple[str, str, Optional[str]], list[tuple[int, int]]] = defaultdict(list)
     first_color: dict[tuple[str, str, Optional[str]], str] = {}
 
     for lineno, raw in enumerate(reader, start=2):
-        norm = _norm_row(raw)
-        if not any(norm.values()):
+        row = _row_to_canonical(raw)
+        if not any(row.values()):
             continue
-        domain = _field(norm, "domain_name")
-        description = _field(norm, "description")
-        start_s = _field(norm, "start")
-        end_s = _field(norm, "end")
+        domain = row["domain_name"]
+        description = row["description"]
+        start_s = row["start"]
+        end_s = row["end"]
         if not domain or not start_s or not end_s:
             raise ValueError(
-                f"行 {lineno}: domain_name（または domain / name 等）, start, end が必要です"
+                f"行 {lineno}: domain_name, start, end が必要です"
             )
         try:
             start, end = int(start_s), int(end_s)
@@ -73,12 +91,12 @@ def load_domain_infos_from_csv_file(f: IO[str]) -> list[DomainInfo]:
                 f"行 {lineno}: start と end は整数である必要があります: {exc}"
             ) from exc
 
-        chain_raw = _field(norm, "chain")
+        chain_raw = row["chain"]
         chain: Optional[str] = chain_raw if chain_raw else None
         key = (domain, description, chain)
         groups[key].append((start, end))
 
-        color_raw = _field(norm, "color")
+        color_raw = row["color"]
         if color_raw and key not in first_color:
             first_color[key] = color_raw
 
@@ -118,7 +136,9 @@ def load_domain_infos_from_csv(
     with p.open(encoding=encoding, newline="") as f:
         return load_domain_infos_from_csv_file(f)
 
-
+# ------------------------------------------------------------
+# モジュール公開関数
+# ------------------------------------------------------------
 __all__ = [
     "load_domain_infos_from_csv",
     "load_domain_infos_from_csv_file",
