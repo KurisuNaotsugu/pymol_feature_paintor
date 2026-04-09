@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "pymol-env"
+name = "pymol_feature_paintor"
 version = "0.1.0"
 description = ""
 authors = ["Kurisu Naotsugu <kurikurikurusu@gmail.com>"]

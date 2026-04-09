@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 
 SRC_NOT_FOUND_MESSAGE = (
-    "pymol_env の src が見つかりません。PyMOL をリポジトリルートで起動するか、"
+    "pymol_feature_paintor の src が見つかりません。PyMOL をリポジトリルートで起動するか、"
     "run にはこのスクリプトの絶対パスを指定してください。"
 )
 
