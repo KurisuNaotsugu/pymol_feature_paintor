@@ -4,7 +4,7 @@
 
 　本プロジェクトはオープンソースの分子構造グラフィクツールであるpymolのプラグインとして開発され、pymol上に表示されているタンパク質3Dモデルに対して、指定領域ごとの着色を施す機能を付与します。また、領域指定はcsvファイルによる指定およびUniprot APIから取得した feature 情報から指定することが可能です。3D構造データは AlphaFold DB から uniprotアクセッション番号をキーとして自動的にロードすることも可能です。
 
-![Uniprotのトポロジー情報に基づいて着色されたタンパク質構造]()
+Uniprotのトポロジー情報に基づいて着色されたタンパク質構造
 
 ## 主な機能
 
@@ -99,14 +99,14 @@ pymol_env/
 cd /path/to/pymol_env
 ```
 
-2. 仮想環境をアクチベート (`conda activate` or `poetry shell`)
+1. 仮想環境をアクチベート (`conda activate` or `poetry shell`)
 
 ```bash
 conda activate env_name # conda環境
 poetry shell # poetry環境
 ```
 
-3. **pymol 起動**
+1. **pymol 起動**
 
 ```bash
 pymol
@@ -114,57 +114,97 @@ pymol
 
 pymolが起動して、プラグインのスクリプトがpymolのコマンドライン上で実行されていれば成功です
 
-![プラグイン読み込み成功時のpymolの画面]()
+プラグイン読み込み成功時のpymolの画面
 
 ### 2. AlphaFold 構造を取得してロード
 
-```bash
+##### コマンド
+
+```python
 fetch_af P12345
 ```
 
-引数:
+##### 引数
+```text 
+  accession (str): UniProt accession（例: P12345）
+```
 
-- accession : Uniprotアクセッション番号
+#### Notes
+- ロードされる PyMOL オブジェクト名は `AF_{accession}` になります。
+- 初回取得時はキャッシュ（例: `~/.cache/pymol_topology/...`）へ保存し、2回目以降は再利用します。
 
 ![ロードされた3D構造データ]()
 
 #### 2. UniProt からfeature 情報を登録
-
-```bash
+##### コマンド
+```python
 preview_feature_domains_from_accession P12345
+```
+##### 引数
+```text 
+  accession (str): UniProt accession（例: P12345）
 ```
 
 ![Uniprtoから取得できるfeature一覧]()
 
-続けて、一覧に出た文字列と **完全一致** する条件で絞り込み登録します（`domain_name` のみ、`description` のみ、または両方＝AND）。いずれか一方は必須です。
-
-```bash
-register_feature_domain_subset AF_P12345, Transmembrane, Helical
+#### 3. 着色する feature を pymol に登録
+##### コマンド
+```python
+register_feature_domain_subset rg_P12345, Transmembrane, Helical
+```
+##### 引数
+```text 
+  registry_name: レジストリキー (例: rg_P12345)
+  domain_name (str): ドメイン名 (例: Topological, Transmenbrane)
+  description (str): ドメインの詳細　 (例: Helical, Extracelluer)
 ```
 
-#### 3. csvファイルから feature 情報を登録
+#### Note
+一覧に出た文字列と **完全一致** する条件で絞り込み登録します（`domain_name` のみ、`description` のみ、または両方＝AND）。いずれか一方は必須です。
 
-```bash
-register_feature_from_csv AF_P12345, /path/to/regions.csv
+#### 3. csvファイルから feature 情報を登録
+##### コマンド
+```python
+register_feature_from_csv rg_P12345, /path/to/regions.csv
+```
+##### 引数
+```text 
+  registry_name: レジストリキー (例: rg_P12345)
+  path (str): csvファイルまでのパス
 ```
 
 #### 4. 3D構造データの着色
-
-```bash
-paint_feature AF_P12345, AF_P12345
+##### コマンド
+```python
+paint_feature rg_P12345, AF_P12345
 ```
-
-第 1 引数が登録名、第 2 引数が着色対象オブジェクト名です。対象オブジェクトが未ロードの場合はエラーになります（自動では AlphaFold を取得しません）。
+##### 引数
+```text 
+  registry_name: レジストリキー (例: rg_P12345)
+  object_name (str): pymolオブジェクト (例: AF_P12345)
+```
+#### Note
+対象オブジェクトが未ロードの場合はエラーになります（自動では AlphaFold を取得しません）。
 
 ![着色後の3D構造データ]()
 
+#### 5. 登録済みの feature 情報の閲覧
+##### コマンド
+```python
+list_feature_registry
+```
+![登録済みの featuer 情報一覧の出力]()
 
-#### 5. 登録済みのfeature 情報の閲覧
-
-```bash
-paint_feature AF_P12345, AF_P12345
+#### 6. 登録済みの feature の指定領域の閲覧
+##### コマンド
+```python
+show_feature_domain_infos rg_P12345
 ```
 
+#### 引数
+```text 
+  registry_name: レジストリキー (例: rg_P12345)
+```
 
 ## プロジェクト構造（層と受け渡しデータ）
 
