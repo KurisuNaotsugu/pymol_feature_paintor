@@ -1,0 +1,7 @@
+domain_name,description,start,end,chain,color
+ATP binding,,45,78,A,lightblue
+Kinase domain,Ser/Thr kinase,120,320,A,salmon
+Transmembrane,Helical,12,34,B,marine
+Transmembrane,Helical,88,110,B,marine
+Regulatory,N-terminal extension,1,44,A,yellow
+Unassigned,,281,350,A,
